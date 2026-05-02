@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bollywood Movies App</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #D4A017;
+    --gold-light: #F0C842;
+    --crimson: #8B1A1A;
+    --cream: #FDF8F0;
+    --ink: #1A1209;
+    --muted: #6B6152;
+    --card-bg: #FFFFFF;
+    --surface: #F5EFE6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); }
+
+  .hero {
+    background: linear-gradient(135deg, #1A1209 0%, #3D2008 60%, #8B1A1A 100%);
+    padding: 48px 32px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(212,160,23,0.04) 40px, rgba(212,160,23,0.04) 80px);
+  }
+  .hero-eyebrow { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 12px; position: relative; }
+  .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 6vw, 64px); font-weight: 900; color: #FFF; line-height: 1.05; position: relative; }
+  .hero-title span { color: var(--gold); font-style: italic; }
+  .hero-sub { font-size: 15px; color: rgba(255,255,255,0.6); margin-top: 12px; font-weight: 300; position: relative; }
+
+  .search-bar { margin-top: 28px; position: relative; max-width: 520px; }
+  .search-bar input {
+    width: 100%; padding: 14px 20px 14px 48px;
+    border-radius: 48px; border: 1.5px solid rgba(212,160,23,0.4);
+    background: rgba(255,255,255,0.08); color: #fff;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.2s;
+  }
+  .search-bar input::placeholder { color: rgba(255,255,255,0.35); }
+  .search-bar input:focus { border-color: var(--gold); }
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ai-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: var(--gold); color: var(--ink); border: none; border-radius: 40px; padding: 8px 18px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+  .ai-btn:hover { background: var(--gold-light); }
+
+  .stats-row { display: flex; gap: 32px; margin-top: 32px; position: relative; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--gold); }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
+
+  .tabs-bar { background: var(--cream); padding: 0 24px; display: flex; gap: 4px; border-bottom: 1px solid rgba(0,0,0,0.08); overflow-x: auto; }
+  .tab { padding: 16px 20px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; }
+  .tab.active { color: var(--crimson); border-bottom-color: var(--crimson); }
+  .tab:hover:not(.active) { color: var(--ink); }
+
+  .main-content { padding: 32px 24px; max-width: 1100px; margin: 0 auto; }
+  .section-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--ink); }
+  .section-link { font-size: 12px; color: var(--crimson); cursor: pointer; font-weight: 500; letter-spacing: 0.5px; }
+
+  .featured-card { background: var(--ink); border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: 1fr 1.4fr; min-height: 220px; margin-bottom: 32px; cursor: pointer; transition: transform 0.2s; }
+  .featured-card:hover { transform: scale(1.01); }
+  .featured-poster { background: linear-gradient(135deg, #D4A017 0%, #8B1A1A 100%); display: flex; align-items: center; justify-content: center; font-size: 56px; position: relative; overflow: hidden; }
+  .featured-poster::after { content: ''; position: absolute; right: -20px; top: 0; bottom: 0; width: 60px; background: linear-gradient(to right, transparent, var(--ink)); }
+  .featured-info { padding: 28px 28px 28px 12px; display: flex; flex-direction: column; justify-content: center; }
+  .featured-badge { display: inline-block; background: rgba(212,160,23,0.15); color: var(--gold); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(212,160,23,0.3); width: fit-content; margin-bottom: 10px; }
+  .featured-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 8px; }
+  .featured-meta { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+  .rating-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .stars { color: var(--gold); font-size: 14px; }
+  .rating-num { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); }
+  .play-btn { display: flex; align-items: center; gap: 8px; background: var(--gold); color: var(--ink); border: none; border-radius: 30px; padding: 10px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; width: fit-content; transition: background 0.2s; }
+  .play-btn:hover { background: var(--gold-light); }
+  .play-icon { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 9px solid var(--ink); }
+
+  .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .movie-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: 0.5px solid rgba(0,0,0,0.08); }
+  .movie-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+  .movie-poster { width: 100%; aspect-ratio: 2/3; display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
+  .movie-rank { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: var(--gold); font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .movie-fav { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: transform 0.15s; }
+  .movie-fav:hover { transform: scale(1.2); }
+  .movie-info { padding: 12px; }
+  .movie-title { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+  .movie-year { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .movie-rating { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--ink); }
+  .star-sm { color: var(--gold); font-size: 11px; }
+  .genre-chip { display: inline-block; background: var(--surface); color: var(--muted); font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-top: 6px; border: 0.5px solid rgba(0,0,0,0.1); }
+
+  .ai-panel { background: linear-gradient(135deg, #1A1209 0%, #3D2008 80%); border-radius: 16px; padding: 24px; margin-bottom: 32px; border: 1px solid rgba(212,160,23,0.2); }
+  .ai-panel-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .ai-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .ai-panel-title { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.9); }
+  .ai-input-row { display: flex; gap: 8px; }
+  .ai-input { flex: 1; padding: 10px 16px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(212,160,23,0.25); color: #fff; font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
+  .ai-input::placeholder { color: rgba(255,255,255,0.3); }
+  .ai-input:focus { border-color: rgba(212,160,23,0.6); }
+  .ai-submit { background: var(--gold); color: var(--ink); border: none; border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; white-space: nowrap; }
+  .ai-submit:hover { background: var(--gold-light); }
+  .ai-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-response { margin-top: 16px; padding: 14px; background: rgba(255,255,255,0.06); border-radius: 10px; font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.8); display: none; }
+  .ai-response.visible { display: block; }
+
+  .figma-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(26,12,9,0.06); border: 0.5px solid rgba(0,0,0,0.1); border-radius: 20px; padding: 4px 12px; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .figma-dot { width: 8px; height: 8px; background: #FF7262; border-radius: 50%; }
+
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-chip { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 400; cursor: pointer; border: 1px solid rgba(0,0,0,0.12); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .filter-chip.active, .filter-chip:hover { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+
+  /* API KEY NOTICE */
+  .api-notice { background: rgba(212,160,23,0.1); border: 1px solid rgba(212,160,23,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+  .api-notice a { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">&#9733; Curated Cinema</div>
+  <h1 class="hero-title">The Best of<br><span>Bollywood</span></h1>
+  <p class="hero-sub">100 years of magic, drama & music — all in one place</p>
+  <div class="search-bar">
+    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search movies, directors, actors..." oninput="filterMovies()">
+    <button class="ai-btn" onclick="scrollToAI()">&#9889; Ask AI</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">22+</div><div class="stat-label">Top Films</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Genres</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Decades</div></div>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab active" onclick="setTab(this,'all')">All Time</button>
+  <button class="tab" onclick="setTab(this,'2000s')">2000s</button>
+  <button class="tab" onclick="setTab(this,'2010s')">2010s</button>
+  <button class="tab" onclick="setTab(this,'2020s')">2020s</button>
+  <button class="tab" onclick="setTab(this,'classics')">Classics</button>
+</div>
+
+<div class="main-content">
+  <div class="figma-badge"><div class="figma-dot"></div> Figma Design System</div>
+
+  <div class="featured-card" onclick="openMovie(0)">
+    <div class="featured-poster" style="background: linear-gradient(135deg,#1A4A3A,#D4A017);">&#127381;</div>
+    <div class="featured-info">
+      <div class="featured-badge">&#9733; Editor's Pick</div>
+      <div class="featured-title">Dilwale Dulhania Le Jayenge</div>
+      <div class="featured-meta">Dir. Aditya Chopra &nbsp;&#183;&nbsp; 1995 &nbsp;&#183;&nbsp; Romance / Drama</div>
+      <div class="rating-row">
+        <span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        <span class="rating-num">9.1 / 10 &nbsp;&bull;&nbsp; 200K+ ratings</span>
+      </div>
+      <button class="play-btn"><div class="play-icon"></div> More Info</button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Top Picks</div>
+    <span class="section-link">View all &rarr;</span>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-chip active" onclick="setGenre(this,'all')">All Genres</button>
+    <button class="filter-chip" onclick="setGenre(this,'Drama')">Drama</button>
+    <button class="filter-chip" onclick="setGenre(this,'Romance')">Romance</button>
+    <button class="filter-chip" onclick="setGenre(this,'Action')">Action</button>
+    <button class="filter-chip" onclick="setGenre(this,'Comedy')">Comedy</button>
+    <button class="filter-chip" onclick="setGenre(this,'Thriller')">Thriller</button>
+  </div>
+
+  <div class="movies-grid" id="moviesGrid"></div>
+
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-panel-header">
+      <div class="ai-dot"></div>
+      <div class="ai-panel-title">AI Movie Advisor — Ask anything about Bollywood</div>
+    </div>
+    <div class="api-notice">
+      &#9432; To enable AI responses, open this file in a text editor and replace <strong>YOUR_API_KEY_HERE</strong> in the script below with your <a href="https://console.anthropic.com/" target="_blank">Anthropic API key</a>.
+    </div>
+    <div class="ai-input-row">
+      <input class="ai-input" id="aiInput" type="text" placeholder="e.g. Recommend a feel-good family movie from the 90s...">
+      <button class="ai-submit" id="aiBtn" onclick="askAI()">Ask &rarr;</button>
+    </div>
+    <div class="ai-response" id="aiResponse"></div>
+  </div>
+</div>
+
+<script>
+  const API_KEY = 'YOUR_API_KEY_HERE';
+
+  const MOVIES = [
+    { title: "Dilwale Dulhania Le Jayenge", year: 1995, rating: 9.1, emoji: "🌹", genre: "Romance", director: "Aditya Chopra", decade: "classics" },
+    { title: "Sholay", year: 1975, rating: 9.0, emoji: "🔥", genre: "Action", director: "Ramesh Sippy", decade: "classics" },
+    { title: "Mughal-E-Azam", year: 1960, rating: 8.9, emoji: "👑", genre: "Drama", director: "K. Asif", decade: "classics" },
+    { title: "3 Idiots", year: 2009, rating: 8.8, emoji: "🎓", genre: "Comedy", director: "Rajkumar Hirani", decade: "2000s" },
+    { title: "Lagaan", year: 2001, rating: 8.7, emoji: "🏏", genre: "Drama", director: "Ashutosh Gowariker", decade: "2000s" },
+    { title: "Dangal", year: 2016, rating: 8.7, emoji: "🤼", genre: "Drama", director: "Nitesh Tiwari", decade: "2010s" },
+    { title: "Dil Chahta Hai", year: 2001, rating: 8.6, emoji: "☀️", genre: "Comedy", director: "Farhan Akhtar", decade: "2000s" },
+    { title: "Rang De Basanti", year: 2006, rating: 8.5, emoji: "🎆", genre: "Drama", director: "Rakeysh Mehra", decade: "2000s" },
+    { title: "Taare Zameen Par", year: 2007, rating: 8.5, emoji: "⭐", genre: "Drama", director: "Aamir Khan", decade: "2000s" },
+    { title: "Kabhi Khushi Kabhie Gham", year: 2001, rating: 8.4, emoji: "🏰", genre: "Romance", director: "Karan Johar", decade: "2000s" },
+    { title: "Gangs of Wasseypur", year: 2012, rating: 8.3, emoji: "🔫", genre: "Thriller", director: "Anurag Kashyap", decade: "2010s" },
+    { title: "PK", year: 2014, rating: 8.1, emoji: "👽", genre: "Comedy", director: "Rajkumar Hirani", decade: "2010s" },
+    { title: "Queen", year: 2014, rating: 8.2, emoji: "👸", genre: "Drama", director: "Vikas Bahl", decade: "2010s" },
+    { title: "Andhadhun", year: 2018, rating: 8.3, emoji: "🎹", genre: "Thriller", director: "Sriram Raghavan", decade: "2010s" },
+    { title: "Gully Boy", year: 2019, rating: 7.9, emoji: "🎤", genre: "Drama", director: "Zoya Akhtar", decade: "2010s" },
+    { title: "Article 15", year: 2019, rating: 8.1, emoji: "⚖️", genre: "Thriller", director: "Anubhav Sinha", decade: "2010s" },
+    { title: "Barfi!", year: 2012, rating: 8.2, emoji: "🍬", genre: "Comedy", director: "Anurag Basu", decade: "2010s" },
+    { title: "Drishyam", year: 2015, rating: 8.3, emoji: "📺", genre: "Thriller", director: "Nishikant Kamat", decade: "2010s" },
+    { title: "The Kashmir Files", year: 2022, rating: 8.3, emoji: "🏔️", genre: "Drama", director: "Vivek Agnihotri", decade: "2020s" },
+    { title: "RRR (Hindi)", year: 2022, rating: 8.0, emoji: "🦁", genre: "Action", director: "SS Rajamouli", decade: "2020s" },
+    { title: "Pathaan", year: 2023, rating: 7.0, emoji: "🕵️", genre: "Action", director: "Siddharth Anand", decade: "2020s" },
+    { title: "12th Fail", year: 2023, rating: 9.0, emoji: "📚", genre: "Drama", director: "Vidhu Vinod Chopra", decade: "2020s" },
+  ];
+
+  let activeGenre = 'all';
+  let activeTab = 'all';
+  let favorites = new Set();
+
+  function posterGradient(genre) {
+    const g = { Romance:'linear-gradient(135deg,#8B1A1A,#D4A017)', Action:'linear-gradient(135deg,#1A2A4A,#4A1A1A)', Drama:'linear-gradient(135deg,#1A4A1A,#4A3A1A)', Comedy:'linear-gradient(135deg,#4A2A1A,#D4A017)', Thriller:'linear-gradient(135deg,#1A1A2A,#2A1A4A)' };
+    return g[genre] || 'linear-gradient(135deg,#2A2A2A,#4A4A4A)';
+  }
+
+  function renderMovies() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let list = MOVIES.filter(m => {
+      const matchGenre = activeGenre === 'all' || m.genre === activeGenre;
+      const matchTab = activeTab === 'all' || m.decade === activeTab;
+      const matchSearch = !search || m.title.toLowerCase().includes(search) || m.director.toLowerCase().includes(search) || m.genre.toLowerCase().includes(search);
+      return matchGenre && matchTab && matchSearch;
+    });
+    const grid = document.getElementById('moviesGrid');
+    if (list.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px;">No movies found. Try a different search.</div>';
+      return;
+    }
+    grid.innerHTML = list.map((m, i) => `
+      <div class="movie-card" onclick="openMovie(${MOVIES.indexOf(m)})">
+        <div class="movie-poster" style="background: ${posterGradient(m.genre)}">
+          <span>${m.emoji}</span>
+          <div class="movie-rank">${i+1}</div>
+          <div class="movie-fav" onclick="event.stopPropagation();toggleFav(${MOVIES.indexOf(m)},this)">${favorites.has(MOVIES.indexOf(m)) ? '❤️' : '🤍'}</div>
+        </div>
+        <div class="movie-info">
+          <div class="movie-title">${m.title}</div>
+          <div class="movie-year">${m.year} · ${m.director.split(' ').slice(-1)[0]}</div>
+          <div class="movie-rating"><span class="star-sm">★</span> ${m.rating}</div>
+          <span class="genre-chip">${m.genre}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleFav(idx, el) {
+    if (favorites.has(idx)) { favorites.delete(idx); el.textContent = '🤍'; }
+    else { favorites.add(idx); el.textContent = '❤️'; }
+  }
+
+  function openMovie(idx) {
+    const m = MOVIES[idx];
+    const q = `Tell me about the Bollywood movie "${m.title}" (${m.year}) directed by ${m.director}. Include the plot, why it's a classic, and similar movies to watch.`;
+    document.getElementById('aiInput').value = q;
+    document.getElementById('aiPanel').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function setGenre(el, genre) {
+    activeGenre = genre;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderMovies();
+  }
+
+  function setTab(el, tab) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderMovies();
+  }
+
+  function filterMovies() { renderMovies(); }
+
+  function scrollToAI() {
+    document.getElementById('aiPanel').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => document.getElementById('aiInput').focus(), 400);
+  }
+
+  async function askAI() {
+    const input = document.getElementById('aiInput');
+    const btn = document.getElementById('aiBtn');
+    const resp = document.getElementById('aiResponse');
+    const q = input.value.trim();
+    if (!q) return;
+
+    if (API_KEY === 'YOUR_API_KEY_HERE') {
+      resp.className = 'ai-response visible';
+      resp.innerHTML = '<span style="color:#F0C842">⚠️ Please add your Anthropic API key in the script section of this HTML file to enable AI responses.</span>';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '...';
+    resp.className = 'ai-response visible';
+    resp.innerHTML = '<span style="color:rgba(255,255,255,0.4)">⚡ Thinking...</span>';
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: 'You are a passionate Bollywood cinema expert and critic. Answer questions about Bollywood movies in a warm, knowledgeable, and enthusiastic way. Keep responses concise (2-4 paragraphs max).',
+          messages: [{ role: 'user', content: q }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || 'Sorry, could not get a response.';
+      resp.innerHTML = text.replace(/\n\n/g, '</p><p style="margin-top:10px">').replace(/\n/g, '<br>');
+    } catch (e) {
+      resp.innerHTML = '<span style="color:#F09595">Could not connect to AI. Check your API key and try again.</span>';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Ask →';
+  }
+
+  document.getElementById('aiInput').addEventListener('keydown', e => { if (e.key === 'Enter') askAI(); });
+  renderMovies();
+</script>
+</body>
+</html>
